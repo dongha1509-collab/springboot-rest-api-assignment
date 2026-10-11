@@ -77,8 +77,8 @@ function Run-4xx {
 
 function Run-5xx {
     Write-Host "===== 서버 오류 (5xx) =====" -ForegroundColor White
-    Call "500  서버 에러 (시연용)"             GET    "/simulate/500"
-    Call "503  서비스 점검 (시연용)"           GET    "/simulate/503"
+    Call "500  서버 에러"             GET    "/simulate/500"
+    Call "503  서비스 점검"           GET    "/simulate/503"
 }
 
 switch ($Only) {
