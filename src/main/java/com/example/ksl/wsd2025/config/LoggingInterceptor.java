@@ -6,13 +6,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import java.util.UUID;
-
 @Component
 public class LoggingInterceptor implements HandlerInterceptor {
-
-    private static final String START_TIME = "startTime";
-    private static final String REQUEST_ID = "requestId";
 
     @Override
     public boolean preHandle(
@@ -20,16 +15,14 @@ public class LoggingInterceptor implements HandlerInterceptor {
             HttpServletResponse response,
             Object handler
     ) {
-        String requestId = UUID.randomUUID().toString().substring(0, 8);
-        request.setAttribute(START_TIME, System.currentTimeMillis());
-        request.setAttribute(REQUEST_ID, requestId);
-        response.setHeader("X-Request-Id", requestId);
+        // 요청이 들어온 시간을 저장해 둔다 (끝날 때 걸린 시간을 구하려고)
+        request.setAttribute("startTime", System.currentTimeMillis());
 
         String method = request.getMethod();
         String uri = request.getRequestURI();
         String query = request.getQueryString();
 
-        System.out.println("[LoggingInterceptor][" + requestId + "] 요청 시작: " + method + " " + uri +
+        System.out.println("[LoggingInterceptor] 요청 시작: " + method + " " + uri +
                 (query != null ? "?" + query : ""));
         return true; // false로 하면 컨트롤러로 안 넘어감
     }
@@ -41,10 +34,10 @@ public class LoggingInterceptor implements HandlerInterceptor {
             Object handler,
             Exception ex
     ) {
-        Long start = (Long) request.getAttribute(START_TIME);
-        long elapsed = start != null ? System.currentTimeMillis() - start : -1;
+        long startTime = (Long) request.getAttribute("startTime");
+        long time = System.currentTimeMillis() - startTime;
 
-        System.out.println("[LoggingInterceptor][" + request.getAttribute(REQUEST_ID) + "] 요청 완료: status="
-                + response.getStatus() + ", " + elapsed + "ms");
+        System.out.println("[LoggingInterceptor] 요청 완료, status=" + response.getStatus()
+                + ", " + time + "ms");
     }
 }

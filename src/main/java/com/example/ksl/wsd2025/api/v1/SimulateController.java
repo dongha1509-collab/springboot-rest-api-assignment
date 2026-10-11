@@ -1,27 +1,24 @@
 package com.example.ksl.wsd2025.api.v1;
 
 import com.example.ksl.wsd2025.common.ApiException;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * 5xx 응답 코드 시연용 (과제의 8개 API에는 포함되지 않음)
- */
+// 5xx 응답을 확인하려고 만든 테스트용 API (과제의 8개 API에는 포함 X)
 @RestController
 @RequestMapping("/api/v1/simulate")
 public class SimulateController {
 
-    // 처리되지 않은 예외 -> GlobalExceptionHandler 가 500 으로 변환
+    // 일부러 에러를 내서 500 확인
     @GetMapping("/500")
-    public String internalError() {
-        throw new IllegalStateException("의도적인 서버 오류");
+    public String error500() {
+        throw new RuntimeException("일부러 낸 서버 에러");
     }
 
-    // 서비스 점검 중 -> 503
+    // 점검 중이라고 가정하고 503 확인
     @GetMapping("/503")
-    public String unavailable() {
-        throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "서비스 점검 중입니다. 잠시 후 다시 시도해 주세요.");
+    public String error503() {
+        throw new ApiException(503, "서비스 점검 중입니다. 잠시 후 다시 시도해 주세요.");
     }
 }

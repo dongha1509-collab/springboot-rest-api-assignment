@@ -1,6 +1,6 @@
 ﻿# 과제 캡처용: 앱(localhost:8080)을 켠 상태에서 PowerShell로 실행
 #   powershell -ExecutionPolicy Bypass -File .\test-requests.ps1
-# 각 호출의 상태 코드, 응답 헤더(Location, X-Request-Id), 본문이 그대로 출력된다.
+# 각 호출의 상태 코드, 응답 헤더(Location 등), 본문이 그대로 출력된다.
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $base = "http://localhost:8080/api/v1"
