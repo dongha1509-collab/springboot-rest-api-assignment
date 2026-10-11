@@ -37,8 +37,8 @@ Spring Boot 3.5.7 / Java 21 / Gradle. 데이터는 DB 없이 메모리(`LinkedHa
 - 요청이 끝나면 응답 `status`와 처리 시간(ms)을 출력합니다.
 
 ```
-[LoggingInterceptor] 요청 시작: POST /api/v1/items
-[LoggingInterceptor] 요청 완료, status=201, 12ms
+[LoggingInterceptor] request start: POST /api/v1/items
+[LoggingInterceptor] request end, status=201, 12ms
 ```
 
 ## C. 사용한 응답 코드

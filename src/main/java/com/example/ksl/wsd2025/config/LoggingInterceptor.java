@@ -22,7 +22,7 @@ public class LoggingInterceptor implements HandlerInterceptor {
         String uri = request.getRequestURI();
         String query = request.getQueryString();
 
-        System.out.println("[LoggingInterceptor] 요청 시작: " + method + " " + uri +
+        System.out.println("[LoggingInterceptor] request start: " + method + " " + uri +
                 (query != null ? "?" + query : ""));
         return true; // false로 하면 컨트롤러로 안 넘어감
     }
@@ -37,7 +37,7 @@ public class LoggingInterceptor implements HandlerInterceptor {
         long startTime = (Long) request.getAttribute("startTime");
         long time = System.currentTimeMillis() - startTime;
 
-        System.out.println("[LoggingInterceptor] 요청 완료, status=" + response.getStatus()
+        System.out.println("[LoggingInterceptor] request end, status=" + response.getStatus()
                 + ", " + time + "ms");
     }
 }
