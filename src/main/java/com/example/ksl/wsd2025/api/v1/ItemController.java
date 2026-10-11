@@ -12,23 +12,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-// 과제용 컨트롤러: POST / GET / PUT / DELETE 각 2개 (총 8개)
-//
-// 응답 형식 (3주차 슬라이드)
-//  - 성공: 객체/배열 그대로 응답 (등록 201 + Location, 삭제 204 본문 없음)
-//  - 실패: {"statusCode":..., "message":"..."}  -> GlobalExceptionHandler 에서 만든다
+// 과제용 컨트롤러 (POST/GET/PUT/DELETE 각 2개)
+// 응답은 3주차 슬라이드대로: 성공은 데이터 그대로, 실패는 {statusCode, message}
 @RestController
 @RequestMapping("/api/v1/items")
 public class ItemController {
 
     // 메모리용 임시 DB (예제용)
-    // LinkedHashMap: 넣은 순서대로 꺼낼 수 있다
     private final Map<Long, ItemDto> store = new LinkedHashMap<>();
     private long sequence = 1L;
 
-    // ================= POST (2개) =================
-
-    // 1) POST: 아이템 1개 생성 -> 201 / 400(입력 오류) / 409(이름 중복)
+    // 1) POST: 생성 (201 / 400 / 409)
     @PostMapping
     public ResponseEntity<ItemDto> createItem(@RequestBody ItemCreateRequest request) {
         checkName(request.getName());
@@ -42,14 +36,14 @@ public class ItemController {
                 .body(item);
     }
 
-    // 2) POST: 아이템 여러 개 한 번에 생성 -> 201 / 400 / 409
+    // 2) POST: 여러 개 한번에 생성
     @PostMapping("/bulk")
     public ResponseEntity<List<ItemDto>> createItems(@RequestBody List<ItemCreateRequest> requests) {
         if (requests.isEmpty()) {
             throw new ApiException(400, "생성할 아이템 목록이 비어 있습니다.");
         }
 
-        // 먼저 전부 검사하고
+        // 일단 다 검사
         for (ItemCreateRequest r : requests) {
             if (r == null) {
                 throw new ApiException(400, "목록에 빈 항목이 있습니다.");
@@ -59,7 +53,7 @@ public class ItemController {
             checkDuplicate(r.getName());
         }
 
-        // 문제가 없으면 저장
+        // 문제없으면 저장
         List<ItemDto> created = new ArrayList<>();
         for (ItemCreateRequest r : requests) {
             created.add(saveItem(r));
@@ -68,9 +62,7 @@ public class ItemController {
         return ResponseEntity.status(201).body(created);
     }
 
-    // ================= GET (2개) =================
-
-    // 3) GET: 전체 조회 (keyword가 있으면 이름에 포함된 것만) -> 200
+    // 3) GET: 전체 조회 (keyword 있으면 이름에 포함된 것만)
     @GetMapping
     public ResponseEntity<List<ItemDto>> getItems(@RequestParam(required = false) String keyword) {
         List<ItemDto> result = new ArrayList<>();
@@ -84,16 +76,14 @@ public class ItemController {
         return ResponseEntity.ok(result);
     }
 
-    // 4) GET: 단건 조회 (PathVariable 사용) -> 200 / 404
+    // 4) GET: 단건 조회 (PathVariable 사용)
     @GetMapping("/{id}")
     public ResponseEntity<ItemDto> getItem(@PathVariable Long id) {
         ItemDto item = findItem(id);
         return ResponseEntity.ok(item);
     }
 
-    // ================= PUT (2개) =================
-
-    // 5) PUT: 아이템 전체 교체 (name, price 둘 다 필요) -> 200 / 400 / 404
+    // 5) PUT: 전체 교체 (name, price 둘 다 필요)
     @PutMapping("/{id}")
     public ResponseEntity<ItemDto> replaceItem(
             @PathVariable Long id,
@@ -110,7 +100,7 @@ public class ItemController {
         return ResponseEntity.ok(item);
     }
 
-    // 6) PUT: 가격만 교체 (price만 필요) -> 200 / 400 / 404
+    // 6) PUT: 가격만 교체
     @PutMapping("/{id}/price")
     public ResponseEntity<ItemDto> replacePrice(
             @PathVariable Long id,
@@ -125,9 +115,7 @@ public class ItemController {
         return ResponseEntity.ok(item);
     }
 
-    // ================= DELETE (2개) =================
-
-    // 7) DELETE: 아이템 1개 삭제 -> 204 (본문 없음) / 404
+    // 7) DELETE: 1개 삭제 (204)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
         findItem(id); // 없으면 여기서 404
@@ -135,7 +123,7 @@ public class ItemController {
         return ResponseEntity.noContent().build();
     }
 
-    // 8) DELETE: 전체 삭제 (실수 방지를 위해 ?confirm=true 필요) -> 204 / 400
+    // 8) DELETE: 전체 삭제 (실수 방지로 confirm=true 있어야 함)
     @DeleteMapping
     public ResponseEntity<Void> deleteAll(@RequestParam(defaultValue = "false") boolean confirm) {
         if (!confirm) {
@@ -147,9 +135,9 @@ public class ItemController {
         return ResponseEntity.noContent().build();
     }
 
-    // ================= 도우미 메소드 =================
+    // ----- 도우미 -----
 
-    // id로 아이템 찾기 (없으면 404)
+    // id로 찾기 (없으면 404)
     private ItemDto findItem(Long id) {
         ItemDto item = store.get(id);
         if (item == null) {
@@ -158,14 +146,14 @@ public class ItemController {
         return item;
     }
 
-    // name 검사 (비어 있으면 400)
+    // name 비었으면 400
     private void checkName(String name) {
         if (name == null || name.trim().isEmpty()) {
             throw new ApiException(400, "name은 필수입니다.");
         }
     }
 
-    // price 검사 (없거나 음수면 400)
+    // price 없거나 음수면 400
     private void checkPrice(Integer price) {
         if (price == null) {
             throw new ApiException(400, "price는 필수입니다.");
@@ -175,7 +163,7 @@ public class ItemController {
         }
     }
 
-    // 같은 이름이 이미 있으면 409
+    // 이름 겹치면 409
     private void checkDuplicate(String name) {
         for (ItemDto item : store.values()) {
             if (item.getName().equals(name)) {
@@ -184,7 +172,7 @@ public class ItemController {
         }
     }
 
-    // 아이템 저장하고 만들어진 아이템 돌려주기
+    // 저장하고 만든 아이템 돌려줌
     private ItemDto saveItem(ItemCreateRequest request) {
         ItemDto item = new ItemDto();
         item.setId(sequence);

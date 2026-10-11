@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-// /api/v1/items 의 8개 API와 응답 코드를 확인하는 테스트
+// v1 API 테스트
 @SpringBootTest
 @AutoConfigureMockMvc
 class ItemControllerTests {
@@ -21,13 +21,13 @@ class ItemControllerTests {
 
     private static final String BASE = "/api/v1/items";
 
-    // 테스트 시작 전에 데이터를 전부 지운다 (id도 1부터 다시 시작)
+    // 매번 데이터 비우고 시작 (id도 1부터)
     @BeforeEach
     void reset() throws Exception {
         mvc.perform(delete(BASE).param("confirm", "true")).andExpect(status().isNoContent());
     }
 
-    // 테스트에서 아이템 하나 만들어 두는 도우미
+    // 아이템 하나 만드는 도우미
     private void create(String name, int price) throws Exception {
         mvc.perform(post(BASE).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"" + name + "\",\"price\":" + price + "}"))
@@ -106,11 +106,11 @@ class ItemControllerTests {
                 .andExpect(jsonPath("$.name").value("pencil"))
                 .andExpect(jsonPath("$.price").value(700));
 
-        // price가 없으면 전체 교체가 아니므로 400
+        // price 없으면 400
         mvc.perform(put(BASE + "/1").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"x\"}"))
                 .andExpect(status().isBadRequest());
 
-        // 없는 id는 404
+        // 없는 id -> 404
         mvc.perform(put(BASE + "/999").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"x\",\"price\":1}"))
                 .andExpect(status().isNotFound());
@@ -138,7 +138,7 @@ class ItemControllerTests {
         mvc.perform(delete(BASE + "/1")).andExpect(status().isNoContent()).andExpect(content().string(""));
         mvc.perform(delete(BASE + "/1")).andExpect(status().isNotFound());
 
-        // confirm 없이 전체 삭제하면 400
+        // confirm 없으면 400
         mvc.perform(delete(BASE)).andExpect(status().isBadRequest());
         mvc.perform(delete(BASE).param("confirm", "true")).andExpect(status().isNoContent());
     }
@@ -155,7 +155,7 @@ class ItemControllerTests {
                 .andExpect(jsonPath("$.statusCode").value(503));
     }
 
-    // 없는 주소와 지원하지 않는 메소드는 스프링 기본 처리 (상태 코드만 확인)
+    // 없는 주소 404, 지원 안 하는 메소드 405 (스프링 기본 처리)
     @Test
     void unknown_url_404_and_wrong_method_405() throws Exception {
         mvc.perform(get("/api/v1/nothing")).andExpect(status().isNotFound());

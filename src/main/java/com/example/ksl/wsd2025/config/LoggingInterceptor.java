@@ -15,7 +15,7 @@ public class LoggingInterceptor implements HandlerInterceptor {
             HttpServletResponse response,
             Object handler
     ) {
-        // 요청이 들어온 시간을 저장해 둔다 (끝날 때 걸린 시간을 구하려고)
+        // 시작 시간 저장 (끝날 때 걸린 시간 구하려고)
         request.setAttribute("startTime", System.currentTimeMillis());
 
         String method = request.getMethod();
