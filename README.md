@@ -41,12 +41,6 @@ DB 없이 메모리에 저장함 (서버 끄면 데이터 사라짐)
 - 4xx: 400, 404, 409
 - 5xx: 500, 503
 
-## 응답 형식 (3주차 슬라이드대로)
-
-- 성공: 데이터 그대로 응답. 등록은 201 + `Location` 헤더, 삭제는 204 (본문 없음)
-- 에러: `{"statusCode":404,"message":"아이템을 찾을 수 없습니다. id=999"}`
-- PUT은 전체 교체라서 name, price 둘 다 보내야 함
-
 ## 테스트
 
 테스트 코드: `./gradlew test`
@@ -61,5 +55,5 @@ DB 없이 메모리에 저장함 (서버 끄면 데이터 사라짐)
 ## 코드 위치
 
 - `api/v1/ItemController.java` : API 8개
-- `common/GlobalExceptionHandler.java` : 에러를 위 형식으로 바꿔줌
+- `common/GlobalExceptionHandler.java` : 에러를 {statusCode, message} 모양으로 바꿔줌
 - `config/LoggingInterceptor.java` : 미들웨어
