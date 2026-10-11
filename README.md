@@ -1,8 +1,5 @@
 # Spring Boot REST API 과제
 
-DB는 안 쓰고 메모리에 저장함. 서버 끄면 데이터 없어짐.
-/api/v1 이 과제 코드고 v2, v3은 수업 때 받은 코드 그대로임.
-
 ## 실행
 
     ./gradlew bootRun     (http://localhost:8080)
